@@ -59,7 +59,7 @@ def main():
     # Sidebar for inputs
     st.sidebar.header('Trip Details')
     budget = st.sidebar.number_input('Total Budget ($)', min_value=500, max_value=10000, value=2000)
-    duration = st.sidebar.number_input('Trip Duration (Days)', min_value=1, max_value=30, value=7)
+    duration = st.sidebar.number_input('Trip Duration (Days)', min_value=1, max_value=30, value=1)
     interests = st.sidebar.multiselect('Select Interests', INTERESTS)
     food_preference = st.sidebar.selectbox('Food Preference', FOOD_PREFERENCES)
     

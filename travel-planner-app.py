@@ -1,58 +1,97 @@
 import streamlit as st
 import random
 
-# Mock data for destinations
+# Mock data for destinations and activities
 DESTINATIONS = [
-    {
-        'name': 'Bali, Indonesia',
-        'type': 'Beach',
-        'avgCost': 1200,
-        'highlights': ['Beaches', 'Temples', 'Surfing'],
-        'activities': ['Beach Yoga', 'Temple Tour', 'Snorkeling']
-    },
-    {
-        'name': 'Tokyo, Japan',
-        'type': 'City',
-        'avgCost': 2000,
-        'highlights': ['Technology', 'Culture', 'Food'],
-        'activities': ['City Tour', 'Sushi Experience', 'Tech Museum']
-    },
-    {
-        'name': 'Swiss Alps',
-        'type': 'Mountains',
-        'avgCost': 2500,
-        'highlights': ['Hiking', 'Scenery', 'Alpine Villages'],
-        'activities': ['Mountain Hiking', 'Scenic Train Ride', 'Village Tour']
-    }
+    {"name": "Bali, Indonesia", "type": "Beach", "avgCost": 1200},
+    {"name": "Tokyo, Japan", "type": "City", "avgCost": 2000},
+    {"name": "Swiss Alps", "type": "Mountains", "avgCost": 2500}
 ]
 
-INTERESTS = ['Adventure', 'Relaxation', 'Culture', 'History', 'Cuisine']
-FOOD_PREFERENCES = ['Vegetarian', 'Vegan', 'Gluten-Free', 'No Restrictions']
+ACTIVITIES = {
+    "Beach": [
+        "Beach Relaxation", 
+        "Snorkeling", 
+        "Island Hopping", 
+        "Local Market Visit", 
+        "Sunset Cruise", 
+        "Water Sports", 
+        "Cultural Performance"
+    ],
+    "City": [
+        "City Tour", 
+        "Museum Visit", 
+        "Local Cuisine Experience", 
+        "Shopping", 
+        "Historical Site Tour", 
+        "Park Exploration", 
+        "Night Market"
+    ],
+    "Mountains": [
+        "Hiking", 
+        "Mountain Biking", 
+        "Scenic Viewpoint Visit", 
+        "Local Village Tour", 
+        "Skiing/Snowboarding", 
+        "Nature Photography", 
+        "Hot Springs"
+    ]
+}
+
+INTERESTS = [
+    'Adventure', 'Relaxation', 'Culture', 'History', 'Cuisine'
+]
+
+FOOD_PREFERENCES = [
+    'Vegetarian', 'Vegan', 'Gluten-Free', 'No Restrictions'
+]
+
+def generate_destination_suggestions(budget, interests):
+    """Filter destinations based on budget and interests."""
+    return [
+        dest for dest in DESTINATIONS 
+        if int(budget) >= dest['avgCost'] and len(interests) > 0
+    ]
 
 def generate_itinerary(destination, duration, budget):
-    # Generate random activities based on trip duration
-    activities = random.sample(destination['activities'], min(len(destination['activities']), duration))
+    """Generate a travel itinerary based on destination and duration."""
+    # Find the destination type
+    dest_type = next(dest['type'] for dest in DESTINATIONS if dest['name'] == destination)
     
-    # Calculate costs
-    daily_budget = budget / duration
-    activities_with_cost = [
-        {
-            'day': i+1, 
+    # Generate activities for each day
+    activities = []
+    available_activities = ACTIVITIES[dest_type].copy()
+    
+    for day in range(1, int(duration) + 1):
+        # Randomly select an activity, remove to avoid repetition
+        if available_activities:
+            activity = random.choice(available_activities)
+            available_activities.remove(activity)
+        else:
+            # Refill activities if depleted
+            available_activities = ACTIVITIES[dest_type].copy()
+            activity = random.choice(available_activities)
+        
+        # Simple cost calculation
+        cost = random.randint(50, 200)
+        
+        activities.append({
+            'day': day, 
             'activity': activity, 
-            'cost': round(random.uniform(50, daily_budget/2), 2)
-        } 
-        for i, activity in enumerate(activities)
-    ]
+            'cost': cost
+        })
     
-    total_cost = sum(activity['cost'] for activity in activities_with_cost)
+    # Calculate total estimated cost
+    total_estimated_cost = sum(activity['cost'] for activity in activities)
     
     return {
-        'destination': destination['name'],
-        'activities': activities_with_cost,
-        'total_cost': round(total_cost, 2),
-        'budget_status': 'Within Budget' if total_cost <= budget else 'Exceeds Budget'
+        'destination': destination,
+        'days': int(duration),
+        'budget': int(budget),
+        'activities': activities,
+        'totalEstimatedCost': total_estimated_cost
     }
-
+    
 def main():
     st.title('✈️ Dream Travel Planner')
     
